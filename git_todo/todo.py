@@ -5,14 +5,14 @@ from dulwich.objects import Blob, Tree, Commit
 
 
 class TODOBranch(object):
-    def __init__(self, repo, ref_name, author_name, author_email):
+    def __init__(self, repo, ref_name):
         self.repo = repo
         self.ref_name = ref_name
-        self.author = '{} <{}>'.format(
-            author_name, author_email).encode('utf8')
 
-    def init_branch(self):
+    def init_branch(self, author_name, author_email):
         if self.ref_name not in self.repo.refs:
+            author = '{} <{}>'.format(author_name, author_email).encode('utf8')
+
             # create TODO branch
             blob = Blob.from_string(b'')
             tree = Tree()
@@ -24,7 +24,7 @@ class TODOBranch(object):
             commit.encoding = 'UTF-8'
 
             tz = arrow.now().utcoffset().seconds
-            commit.author = commit.committer = self.author
+            commit.author = commit.committer = author
             commit.author_time = commit.commit_time = int(time())
             commit.commit_timezone = commit.author_timezone = tz
 

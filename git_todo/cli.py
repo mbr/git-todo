@@ -37,12 +37,15 @@ def cli(ctx, todo_branch, repo):
         sys.exit(1)
 
     obj['repo'] = repo
+    obj['gitconfig'] = repo.get_config_stack()
 
 
 @cli.command()
 @click.pass_obj
 def new(obj):
-    db = TODOBranch(obj['repo'], 'refs/heads/' + obj['todo_branch'],
-                    'Bob Bobson', 'bob@bob.bob')
-    if db.init_branch():
+    db = TODOBranch(obj['repo'], 'refs/heads/' + obj['todo_branch'])
+    gitconfig = obj['gitconfig']
+
+    name, email = gitconfig.get('user', 'name'), gitconfig.get('user', 'email')
+    if db.init_branch(name, email):
         click.echo('Created new branch \'{}\''.format(obj['todo_branch']))
