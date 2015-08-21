@@ -9,7 +9,11 @@ class TODOBranch(object):
         self.repo = repo
         self.ref_name = ref_name
 
-    def init_branch(self, author_name, author_email):
+    @property
+    def exists(self):
+        return self.ref_name in self.repo.refs
+
+    def init_ref(self, author_name, author_email):
         if self.ref_name not in self.repo.refs:
             author = '{} <{}>'.format(author_name, author_email).encode('utf8')
 

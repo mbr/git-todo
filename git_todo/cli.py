@@ -38,14 +38,24 @@ def cli(ctx, todo_branch, repo):
 
     obj['repo'] = repo
     obj['gitconfig'] = repo.get_config_stack()
+    obj['db'] = TODOBranch(repo, 'refs/heads/' + todo_branch)
 
 
 @cli.command()
+@click.option('--force', '-f',
+              is_flag=True,
+              help='Create new branch even if one exists')
 @click.pass_obj
-def new(obj):
-    db = TODOBranch(obj['repo'], 'refs/heads/' + obj['todo_branch'])
+def new(obj, force):
+    db = obj['db']
     gitconfig = obj['gitconfig']
 
+    if db.exists and not force:
+        click.echo('Branch {} already exists. Use --force to overwrite'
+                   .format(obj['todo_branch']),
+                   err=True)
+        return sys.exit(1)
+
     name, email = gitconfig.get('user', 'name'), gitconfig.get('user', 'email')
-    if db.init_branch(name, email):
-        click.echo('Created new branch \'{}\''.format(obj['todo_branch']))
+    db.init_ref(name, email)
+    click.echo('Created new branch \'{}\''.format(obj['todo_branch']))
