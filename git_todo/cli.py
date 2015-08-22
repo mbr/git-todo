@@ -7,7 +7,7 @@ from dulwich.repo import Repo
 from .todo import TODOBranch
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option('--todo-branch', '-t', help='TODO branch name', default='todo')
 @click.option('--repo', '-r', help='Path to git repo (default: auto)')
 @click.pass_context
@@ -40,6 +40,9 @@ def cli(ctx, todo_branch, repo):
     obj['gitconfig'] = repo.get_config_stack()
     obj['db'] = TODOBranch(repo, 'refs/heads/' + todo_branch)
 
+    if ctx.invoked_subcommand is None:
+        return ctx.invoke(list_todos)
+
 
 @cli.command()
 @click.option('--force', '-f',
@@ -68,3 +71,9 @@ def edit(obj):
 
     if new_todo is None:
         click.echo('No changes.')
+
+
+@cli.command('list')
+@click.pass_obj
+def list_todos(obj):
+    click.echo(obj['db'].get_todo(), nl=False)
