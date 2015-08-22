@@ -14,34 +14,42 @@ class TODOBranch(object):
         return self.ref_name in self.repo.refs
 
     def init_ref(self, author_name, author_email):
-        if self.ref_name not in self.repo.refs:
-            author = '{} <{}>'.format(author_name, author_email).encode('utf8')
+        self.save_commit(
+            *self.create_todo_commit(
+                b'', 'Initial commit for TODO branch', author_name,
+                author_email),
+            update_ref=self.ref_name)
 
-            # create TODO branch
-            blob = Blob.from_string(b'')
-            tree = Tree()
-            tree.add(b'TODO', 0o100644, blob.id)
+    def create_todo_commit(self, contents, message, author_name, author_email,
+                           parent=None):
+        author = '{} <{}>'.format(author_name, author_email).encode('utf8')
 
-            commit = Commit()
-            commit.tree = tree.id
-            commit.message = 'Initial commit for TODO branch'
-            commit.encoding = 'UTF-8'
+        # create TODO branch
+        blob = Blob.from_string(contents)
+        tree = Tree()
+        tree.add(b'TODO', 0o100644, blob.id)
 
-            tz = arrow.now().utcoffset().seconds
-            commit.author = commit.committer = author
-            commit.author_time = commit.commit_time = int(time())
-            commit.commit_timezone = commit.author_timezone = tz
+        commit = Commit()
+        commit.tree = tree.id
+        commit.message = message.encode('utf8')
+        commit.encoding = 'UTF-8'
 
-            # add objects to repo
-            store = self.repo.object_store
-            store.add_object(blob)
-            store.add_object(tree)
-            store.add_object(commit)
+        tz = arrow.now().utcoffset().seconds
+        commit.author = commit.committer = author
+        commit.author_time = commit.commit_time = int(time())
+        commit.commit_timezone = commit.author_timezone = tz
 
-            # set branch
-            self.repo.refs[self.ref_name] = commit.id
-            return True
-        return False
+        # add objects to repo
+        return commit, tree, blob
+
+    def save_commit(self, commit, tree, blob, update_ref=None):
+        store = self.repo.object_store
+        store.add_object(blob)
+        store.add_object(tree)
+        store.add_object(commit)
+
+        if update_ref:
+            self.repo.refs[update_ref] = commit.id
 
     def get_todo(self):
         commit = self.repo[self.repo.refs[self.ref_name]]
