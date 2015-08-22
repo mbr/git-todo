@@ -37,8 +37,10 @@ def cli(ctx, todo_branch, repo):
         sys.exit(1)
 
     obj['repo'] = repo
-    obj['gitconfig'] = repo.get_config_stack()
+    obj['gitconfig'] = gitconfig = repo.get_config_stack()
     obj['db'] = TODOBranch(repo, 'refs/heads/' + todo_branch)
+    obj['user_name'] = gitconfig.get('user', 'name')
+    obj['user_email'] = gitconfig.get('user', 'email')
 
     if ctx.invoked_subcommand is None:
         return ctx.invoke(list_todos)
@@ -51,7 +53,6 @@ def cli(ctx, todo_branch, repo):
 @click.pass_obj
 def new(obj, force):
     db = obj['db']
-    gitconfig = obj['gitconfig']
 
     if db.exists and not force:
         click.echo('Branch {} already exists. Use --force to overwrite'
@@ -59,7 +60,7 @@ def new(obj, force):
                    err=True)
         return sys.exit(1)
 
-    name, email = gitconfig.get('user', 'name'), gitconfig.get('user', 'email')
+    name, email = obj['user_name'], obj['user_email']
     db.init_ref(name, email)
     click.echo('Created new branch \'{}\''.format(obj['todo_branch']))
 
@@ -68,9 +69,12 @@ def new(obj, force):
 @click.pass_obj
 def edit(obj):
     new_todo = click.edit(obj['db'].get_todo())
+    name, email = obj['user_name'], obj['user_email']
 
     if new_todo is None:
         click.echo('No changes.')
+    else:
+        obj['db'].save_todo(name, email, new_todo)
 
 
 @cli.command('list')

@@ -20,12 +20,12 @@ class TODOBranch(object):
                 author_email),
             update_ref=self.ref_name)
 
-    def create_todo_commit(self, contents, message, author_name, author_email,
-                           parent=None):
+    def create_todo_commit(self, text, message, author_name, author_email,
+                           parent_id=None):
         author = '{} <{}>'.format(author_name, author_email).encode('utf8')
 
         # create TODO branch
-        blob = Blob.from_string(contents)
+        blob = Blob.from_string(text.encode('utf8'))
         tree = Tree()
         tree.add(b'TODO', 0o100644, blob.id)
 
@@ -33,6 +33,9 @@ class TODOBranch(object):
         commit.tree = tree.id
         commit.message = message.encode('utf8')
         commit.encoding = 'UTF-8'
+
+        if parent_id:
+            commit.parents = [parent_id]
 
         tz = arrow.now().utcoffset().seconds
         commit.author = commit.committer = author
@@ -57,4 +60,11 @@ class TODOBranch(object):
         mode, hash = tree.lookup_path(self.repo.__getitem__, 'TODO')
         blob = self.repo[hash]
 
-        return blob.as_raw_string()
+        return blob.as_raw_string().decode('utf8')
+
+    def save_todo(self, author_name, author_email, content):
+        self.save_commit(
+            *self.create_todo_commit(
+                content, 'Updated TODO', author_name, author_email,
+                self.repo.refs[self.ref_name]),
+            update_ref=self.ref_name)
