@@ -59,3 +59,12 @@ def new(obj, force):
     name, email = gitconfig.get('user', 'name'), gitconfig.get('user', 'email')
     db.init_ref(name, email)
     click.echo('Created new branch \'{}\''.format(obj['todo_branch']))
+
+
+@cli.command()
+@click.pass_obj
+def edit(obj):
+    new_todo = click.edit(obj['db'].get_todo())
+
+    if new_todo is None:
+        click.echo('No changes.')

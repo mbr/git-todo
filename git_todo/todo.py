@@ -42,3 +42,11 @@ class TODOBranch(object):
             self.repo.refs[self.ref_name] = commit.id
             return True
         return False
+
+    def get_todo(self):
+        commit = self.repo[self.repo.refs[self.ref_name]]
+        tree = self.repo[commit.tree]
+        mode, hash = tree.lookup_path(self.repo.__getitem__, 'TODO')
+        blob = self.repo[hash]
+
+        return blob.as_raw_string()
