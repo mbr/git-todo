@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name='git-todo',
-    version='0.1.dev1',
+    version='0.2.dev1',
     description=
     'Tracks issues and TODOs in a standalone branch in your repository.',
     long_description=read('README.rst'),
