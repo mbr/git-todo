@@ -81,5 +81,13 @@ def edit(obj):
 @cli.command('list')
 @click.pass_obj
 def list_todos(obj):
+    db = obj['db']
+
+    if not db.exists:
+        click.echo('No {} branch found. Run \'git todo new\' to create it'
+                   .format(obj['todo_branch']),
+                   err=True)
+        sys.exit(1)
+
     doc = parser.grammar(obj['db'].get_todo()).doc()
     click.echo(parser.Printer().visit(doc), nl=False)
