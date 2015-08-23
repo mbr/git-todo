@@ -5,6 +5,7 @@ import click
 from dulwich.repo import Repo
 
 from .todo import TODOBranch
+from . import parser
 
 
 @click.group(invoke_without_command=True)
@@ -80,4 +81,5 @@ def edit(obj):
 @cli.command('list')
 @click.pass_obj
 def list_todos(obj):
-    click.echo(obj['db'].get_todo(), nl=False)
+    doc = parser.grammar(obj['db'].get_todo()).doc()
+    click.echo(parser.Printer().visit(doc), nl=False)
