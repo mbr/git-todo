@@ -21,7 +21,7 @@ setup(
     url='https://github.com/mbr/git-todo',
     license='MIT',
     packages=find_packages(exclude=['tests']),
-    install_requires=['click>=4.0', 'dulwich', 'arrow'],
+    install_requires=['click>=4.0', 'dulwich', 'arrow', 'parsley', 'visitor'],
     entry_points={
         'console_scripts': [
             'git-todo = git_todo.cli:cli',
