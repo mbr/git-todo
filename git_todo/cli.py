@@ -8,7 +8,9 @@ from .todo import TODOBranch
 from . import parser
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True,
+    help='Manages a TODO inside a separate branch in this git repository')
 @click.option('--todo-branch', '-t', help='TODO branch name', default='todo')
 @click.option('--repo', '-r', help='Path to git repo (default: auto)')
 @click.pass_context
@@ -47,7 +49,7 @@ def cli(ctx, todo_branch, repo):
         return ctx.invoke(list_todos)
 
 
-@cli.command()
+@cli.command(help='Create new TODO list branch.')
 @click.option('--force', '-f',
               is_flag=True,
               help='Create new branch even if one exists')
@@ -66,7 +68,7 @@ def new(obj, force):
     click.echo('Created new branch \'{}\''.format(obj['todo_branch']))
 
 
-@cli.command()
+@cli.command(help='Open the TODO in your preferred $EDITOR.')
 @click.pass_obj
 def edit(obj):
     new_todo = click.edit(obj['db'].get_todo())
@@ -78,7 +80,7 @@ def edit(obj):
         obj['db'].save_todo(name, email, new_todo)
 
 
-@cli.command('list')
+@cli.command('list', help='Print current TODO list.')
 @click.pass_obj
 def list_todos(obj):
     db = obj['db']
