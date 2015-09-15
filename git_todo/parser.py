@@ -74,5 +74,5 @@ class Printer(Visitor):
                 style['fg'] = 'red'
                 style['bold'] = True
 
-        buf = (u'\u274C' if not node.done else u'\u2714') + ' ' + node.text
+        buf = (u'\u25CB' if not node.done else u'\u2714') + ' ' + node.text
         return click.style(buf, **style)
